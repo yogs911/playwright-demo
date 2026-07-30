@@ -33,19 +33,19 @@ jobs:
         run: npx playwright install chromium --with-deps
 
       - name: Run API tests
-        run: npx playwright test tests/api/ --project=api
+        run: npx playwright test tests/api/ --project=api --reporter=blob
         env:
           API_KEY: ${{ secrets.API_KEY }}
           PROJECT_ID: ${{ secrets.PROJECT_ID }}
           BASE_URL: ${{ secrets.BASE_URL }}
 
-      - name: Upload API test report
+      - name: Upload blob report
         uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}
         with:
-          name: api-test-report
-          path: playwright-report/
-          retention-days: 30
+          name: blob-report-api
+          path: blob-report/
+          retention-days: 1
 
   # ─── UI Tests (sharded) ───────────────────────────────────────
   ui-tests:
@@ -76,19 +76,19 @@ jobs:
         run: npx playwright install chromium --with-deps
 
       - name: Run UI tests
-        run: npx playwright test tests/ui/ --project=chromium --shard=${{ matrix.shardIndex }}/${{ matrix.shardTotal }}
+        run: npx playwright test tests/ui/ --project=chromium --shard=${{ matrix.shardIndex }}/${{ matrix.shardTotal }} --reporter=blob
         env:
           ORANGEHRM_URL: ${{ secrets.ORANGEHRM_URL }}
           ORANGEHRM_USERNAME: ${{ secrets.ORANGEHRM_USERNAME }}
           ORANGEHRM_PASSWORD: ${{ secrets.ORANGEHRM_PASSWORD }}
 
-      - name: Upload shard report
+      - name: Upload blob report
         uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}
         with:
-          name: ui-test-report-shard-${{ matrix.shardIndex }}
-          path: playwright-report/
-          retention-days: 30
+          name: blob-report-ui-shard-${{ matrix.shardIndex }}
+          path: blob-report/
+          retention-days: 1
 
   # ─── Merge reports ────────────────────────────────────────────
   merge-reports:
@@ -110,15 +110,17 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Download all reports
+      - name: Download all blob reports
         uses: actions/download-artifact@v4
         with:
-          path: all-reports/
+          path: all-blob-reports/
+          pattern: blob-report-*
+          merge-multiple: true
 
       - name: Merge reports
-        run: npx playwright merge-reports --reporter html ./all-reports/
+        run: npx playwright merge-reports --reporter html ./all-blob-reports/
 
-      - name: Upload merged report
+      - name: Upload merged HTML report
         uses: actions/upload-artifact@v4
         with:
           name: merged-playwright-report
