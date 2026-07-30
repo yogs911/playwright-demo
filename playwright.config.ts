@@ -14,7 +14,7 @@ export default defineConfig({
     ['list']
   ],
   use: {
-    baseURL: process.env.BASE_URL || 'https://reqres.in',
+    baseURL: process.env.ORANGEHRM_URL || 'https://opensource-demo.orangehrmlive.com',
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
     video: 'on-first-retry',
@@ -27,7 +27,10 @@ export default defineConfig({
     {
       name: 'api',
       testDir: './tests/api',
-      use: { ...devices['Desktop Chrome'] },
+      use: {
+        ...devices['Desktop Chrome'],
+        baseURL: process.env.BASE_URL || 'https://reqres.in',
+      },
     },
   ],
 });

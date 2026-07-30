@@ -25,13 +25,19 @@ export class APIClient {
             ...options?.headers,
         };
 
-        const methodMap: Record<HttpMethod, () => Promise<APIResponse>> = {
-            GET: () => this.request.get(endpoint, { params: options?.params, headers}),
-            POST: () => this.request.post(endpoint, { data: options?.data, headers}),
-            PUT: () => this.request.put(endpoint, { data: options?.data, headers}),
-            PATCH: () => this.request.patch(endpoint, { data: options?.data, headers}),
-            DELETE: () => this.request.delete(endpoint, { headers}),
+        const params = {
+            project_id: this.projectId,
+            ...options?.params,
         };
+
+        const methodMap: Record<HttpMethod, () => Promise<APIResponse>> = {
+            GET: () => this.request.get(endpoint, { params, headers }),
+            POST: () => this.request.post(endpoint, { params, headers, data: options?.data }),
+            PUT: () => this.request.put(endpoint, { params, headers, data: options?.data }),
+            PATCH: () => this.request.patch(endpoint, { params, headers, data: options?.data }),
+            DELETE: () => this.request.delete(endpoint, { params, headers }),
+        };
+
 
         return methodMap[method]();
     }
