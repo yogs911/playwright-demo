@@ -1,7 +1,11 @@
 import { defineConfig, devices } from '@playwright/test';
+import * as os from 'node:os';
 import * as dotenv from 'dotenv';
+import * as path from 'node:path';
 
-dotenv.config({ path: `config/.env.${process.env.ENV || 'dev'}` });
+console.log('#####inside config######')
+
+dotenv.config({ path: path.resolve(process.cwd(), `./config/.env.${process.env.ENV || 'dev'}`) });
 
 export default defineConfig({
   testDir: './tests',
@@ -9,10 +13,6 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
   workers: process.env.CI ? 4 : undefined,
-  reporter: [
-    ['html', { open: 'never' }],
-    ['list']
-  ],
   use: {
     baseURL: process.env.ORANGEHRM_URL || 'https://opensource-demo.orangehrmlive.com',
     trace: 'on-first-retry',
@@ -21,16 +21,35 @@ export default defineConfig({
   },
   projects: [
     {
-      name: 'chromium',
-      use: { ...devices['Desktop Chrome'] },
+      name: 'ui',
+      testDir: './tests/ui',
+      use: {
+        ...devices['Desktop Chrome'],
+      },
     },
     {
       name: 'api',
       testDir: './tests/api',
-      use: {
-        ...devices['Desktop Chrome'],
-        baseURL: process.env.BASE_URL || 'https://reqres.in',
-      },
     },
+  ],
+
+  reporter: [
+    ['list'],
+    [
+      'allure-playwright',
+      {
+        resultsDir: 'allure-results',
+        detail: true,
+        suiteTitle: true,
+        environmentInfo: {
+          os_platform: os.platform(),
+          os_release: os.release(),
+          node_version: process.version,
+          environment: process.env.ENV || 'dev',
+          base_url: process.env.BASE_URL || 'https://reqres.in',
+        },
+      },
+    ],
+    process.env.CI ? ['blob'] : ['html', { open: 'never' }],
   ],
 });

@@ -42,24 +42,44 @@ export class APIClient {
         return methodMap[method]();
     }
 
+    private async parseResponse<T>(response: APIResponse): Promise<T> {
+        const contentType = response.headers()['content-type'] || '';
+
+        if (!contentType.includes('application/json')) {
+            const text = await response.text();
+            throw new Error(
+                `Expected JSON but got ${contentType}. Status: ${response.status()}. Body: ${text.slice(0, 200)}`
+            );
+        }
+
+        if (!response.ok()) {
+            const json = await response.json();
+            throw new Error(
+                `Request failed with status ${response.status()}: ${JSON.stringify(json)}`
+            );
+        }
+
+        return response.json() as Promise<T>;
+    }
+
     async get<T>(endpoint: string, params?: Record<string, string>): Promise<T> {
         const response = await this.sendRequest('GET', endpoint, { params });
-        return response.json() as Promise<T>;
+        return this.parseResponse<T>(response);
     }
 
     async post<T>(endpoint: string, data: unknown): Promise<T> {
         const response = await this.sendRequest('POST', endpoint, { data });
-        return response.json() as Promise<T>;
+        return this.parseResponse<T>(response);
     }
 
     async put<T>(endpoint: string, data: unknown): Promise<T> {
         const response = await this.sendRequest('PUT', endpoint, { data });
-        return response.json() as Promise<T>;
+        return this.parseResponse<T>(response);
     }
 
     async patch<T>(endpoint: string, data: unknown): Promise<T> {
         const response = await this.sendRequest('PATCH', endpoint, { data });
-        return response.json() as Promise<T>;
+        return this.parseResponse<T>(response);
     }
 
     async delete(endpoint: string): Promise<APIResponse> {

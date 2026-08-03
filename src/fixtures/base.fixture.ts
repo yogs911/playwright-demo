@@ -1,4 +1,6 @@
-import { test as base, Page } from '@playwright/test';
+import { test as base, Page, request } from '@playwright/test';
+import * as dotenv from 'dotenv';
+import * as path from 'node:path';
 import { APIClient } from '../api/apiClient';
 import { UserAPI } from '../api/user.api';
 import { ProductAPI } from '../api/product.api';
@@ -17,9 +19,13 @@ type CustomFixtures = {
 };
 
 export const test = base.extend<CustomFixtures>({
-  apiClient: async ({ request }, use) => {
-    const client = new APIClient(request);
+  apiClient: async ({}, use) => {
+    const requestContext = await request.newContext({
+      baseURL: process.env.API_BASE_URL || 'https://reqres.in',
+    });
+    const client = new APIClient(requestContext);
     await use(client);
+    await requestContext.dispose();
   },
 
   userAPI: async ({ apiClient }, use) => {
