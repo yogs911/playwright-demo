@@ -76,7 +76,7 @@ jobs:
         run: npx playwright install chromium --with-deps
 
       - name: Run UI tests
-        run: npx playwright test tests/ui/ --project=chromium --shard=${{ matrix.shardIndex }}/${{ matrix.shardTotal }} --reporter=blob
+        run: npx playwright test tests/ui/ --project=ui --shard=${{ matrix.shardIndex }}/${{ matrix.shardTotal }} --reporter=blob
         env:
           ORANGEHRM_URL: ${{ secrets.ORANGEHRM_URL }}
           ORANGEHRM_USERNAME: ${{ secrets.ORANGEHRM_USERNAME }}
