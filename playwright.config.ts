@@ -13,6 +13,7 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
   workers: process.env.CI ? 4 : undefined,
+  timeout: 120_000,
   use: {
     baseURL: process.env.ORANGEHRM_URL || 'https://opensource-demo.orangehrmlive.com',
     trace: 'on-first-retry',

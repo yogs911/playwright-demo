@@ -1,6 +1,4 @@
 import { test as base, Page, request } from '@playwright/test';
-import * as dotenv from 'dotenv';
-import * as path from 'node:path';
 import { APIClient } from '../api/apiClient';
 import { UserAPI } from '../api/user.api';
 import { ProductAPI } from '../api/product.api';
